@@ -4,6 +4,7 @@ import { api } from './api.js';
 import { AuthForm } from './pages/AuthForm.js';
 import { MeetingDetail } from './pages/MeetingDetail.js';
 import { Import } from './pages/Import.js';
+import { AudioUpload } from './pages/AudioUpload.js';
 import { Meetings } from './pages/Meetings.js';
 import { Archive } from './pages/Archive.js';
 import { Bin } from './pages/Bin.js';
@@ -97,6 +98,8 @@ export function App() {
     <Record />
   ) : route === '/import' ? (
     <Import />
+  ) : route === '/upload' ? (
+    <AudioUpload />
   ) : route.startsWith('/settings') ? (
     <Settings
       route={route}

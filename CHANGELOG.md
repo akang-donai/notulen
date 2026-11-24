@@ -1,5 +1,16 @@
 # Changelog
 
+## [0.5.0](https://github.com/akang-donai/notulen/releases/tag/v0.5.0) (2026-11-24)
+
+### Features
+
+* Upload ordered MP3, WAV, M4A, OGG or WebM files to create one meeting, limited to 10 MB per file and 100 MB total.
+* Retry interrupted uploads without duplicate meetings; discard unfinished uploads and retry pending processing.
+
+### Bug Fixes
+
+* Normalize mixed audio formats before merging; reject corrupt recordings and retain accurate durations.
+
 ## [0.4.0](https://github.com/dennisklappe/openminutes/compare/v0.3.1...v0.4.0) (2026-11-16)
 
 

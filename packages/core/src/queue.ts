@@ -2,6 +2,8 @@ import { PgBoss } from 'pg-boss';
 import { jobNames, type JobName, type JobPayloads } from './jobs.js';
 
 export interface SendOptions {
+  /** Stable pg-boss job ID for an idempotent submission. */
+  id?: string;
   startAfter?: Date;
   expireInSeconds?: number;
   retryLimit?: number;

@@ -39,6 +39,7 @@ import { shareEmailRoutes } from './email/share-routes.js';
 import { minutesSettingsRoutes } from './minutes/settings-routes.js';
 import { shareRoutes } from './minutes/share-routes.js';
 import { recordingRoutes } from './recordings/routes.js';
+import { audioUploadRoutes } from './audio-uploads.js';
 import { phoneConfigRoutes, phoneSettingsRoutes } from './settings/phone.js';
 import { summaryAiEditRoutes } from './minutes/ai-edit-routes.js';
 import { summaryEditRoutes } from './minutes/summary-edit-routes.js';
@@ -91,12 +92,13 @@ export interface AppDeps {
 export const MAX_API_BODY_BYTES = 4 * 1024 * 1024;
 const GIB = 1024 * 1024 * 1024;
 const CHUNK_UPLOAD = /^\/api\/(recordings|imports)\/[^/]+\/chunks\//;
+const AUDIO_UPLOAD = /^\/api\/audio-uploads\/[^/]+\/files\/\d+$/;
 const limitBody = bodyLimit({
   maxSize: MAX_API_BODY_BYTES,
   onError: (c) => c.json({ error: 'The request is too large' }, 413),
 });
 const limitApiBody = createMiddleware((c, next) =>
-  CHUNK_UPLOAD.test(c.req.path) ? next() : limitBody(c, next),
+  CHUNK_UPLOAD.test(c.req.path) || AUDIO_UPLOAD.test(c.req.path) ? next() : limitBody(c, next),
 );
 
 const NOT_FOUND = `<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><meta name="robots" content="noindex"><title>Page not found</title><meta name="color-scheme" content="light dark"><style>body{font:16px/1.5 system-ui,sans-serif;max-width:32rem;margin:20vh auto;padding:0 1rem;color:#1c1f24;background:#fff}h1{font-size:1.25rem;margin:0 0 .5rem}p{margin:0 0 1rem;color:#5d6572}a{color:#2760ab;display:inline-block;padding:.6rem 0}@media(prefers-color-scheme:dark){body{color:#e6e8ec;background:#14171c}p{color:#9aa3b0}a{color:#74a8ef}}</style></head><body><h1>Page not found</h1><p>Nothing lives at this address.</p><a href="/">Back to OpenMinutes</a></body></html>`;
@@ -195,6 +197,8 @@ export function createApp(deps: AppDeps): Hono {
   api.route('/library', libraryRoutes(deps));
   api.use('/recordings/*', requireSession(deps));
   api.route('/recordings', recordingRoutes(deps));
+  api.use('/audio-uploads/*', requireSession(deps));
+  api.route('/audio-uploads', audioUploadRoutes(deps));
   api.use('/imports/*', requireSession(deps));
   api.route(
     '/imports',

@@ -2,8 +2,14 @@ import { mkdtemp, rename, rm, writeFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { dirname, extname, join } from 'node:path';
 import { runFfmpeg } from './ffmpeg.js';
+import { probeDuration } from './probe-duration.js';
 
-export type MergeAudio = (inputs: string[], output: string) => Promise<void>;
+export type MergeAudio = (
+  inputs: string[],
+  output: string,
+  normalize?: boolean,
+  // eslint-disable-next-line @typescript-eslint/no-invalid-void-type -- Existing mergers return void; normalization adds measured durations.
+) => Promise<void | { durationMs: number; fileDurationsMs: number[] }>;
 
 const OPUS_EXTENSIONS = new Set(['.opus', '.webm', '.ogg']);
 
@@ -16,10 +22,47 @@ const codecArgs = (inputs: string[]) =>
 
 const quote = (path: string) => `'${path.replaceAll("'", "'\\''")}'`;
 
-export const mergeAudio: MergeAudio = async (inputs, output) => {
+export const mergeAudio: MergeAudio = async (inputs, output, normalize = false) => {
   const dir = await mkdtemp(join(tmpdir(), 'openminutes-merge-'));
   const partial = join(dirname(output), '.merged.opus.part');
+  const fileDurationsMs: number[] = [];
   try {
+    if (normalize) {
+      const normalized: string[] = [];
+      for (const [index, input] of inputs.entries()) {
+        const path = join(dir, `${index}.opus`);
+        await runFfmpeg([
+          '-hide_banner',
+          '-loglevel',
+          'error',
+          '-y',
+          '-xerror',
+          '-i',
+          input,
+          '-map',
+          '0:a:0',
+          '-vn',
+          '-sn',
+          '-dn',
+          '-c:a',
+          'libopus',
+          '-b:a',
+          '48k',
+          '-ac',
+          '1',
+          '-ar',
+          '48000',
+          '-threads',
+          '2',
+          '-f',
+          'opus',
+          path,
+        ]);
+        normalized.push(path);
+        fileDurationsMs.push(await probeDuration(path));
+      }
+      inputs = normalized;
+    }
     const list = join(dir, 'list.txt');
     await writeFile(list, inputs.map((path) => `file ${quote(path)}\n`).join(''));
     await runFfmpeg([
@@ -39,6 +82,7 @@ export const mergeAudio: MergeAudio = async (inputs, output) => {
       partial,
     ]);
     await rename(partial, output);
+    if (normalize) return { durationMs: await probeDuration(output), fileDurationsMs };
   } finally {
     await rm(dir, { recursive: true, force: true });
     await rm(partial, { force: true });

@@ -66,7 +66,7 @@ async function mergeOriginalAudio(
   meetingId: string,
 ): Promise<{ path: string; durationMs: number }> {
   const files = await deps.db
-    .select({ path: audioFiles.path, durationMs: audioFiles.durationMs })
+    .select({ id: audioFiles.id, path: audioFiles.path, durationMs: audioFiles.durationMs })
     .from(audioFiles)
     .where(eq(audioFiles.meetingId, meetingId))
     .orderBy(audioFiles.path);
@@ -75,10 +75,23 @@ async function mergeOriginalAudio(
   const original = originalAudioPath(meetingId);
   await storage.local.ensureDirectory(dirname(original));
   const inputs = await Promise.all(files.map((file) => storage.ensureLocal(file.path)));
-  await deps.mergeAudio(inputs, storage.local.absolutePath(original));
+  const uploaded = files.some((file) => file.path.startsWith(`meetings/${meetingId}/uploads/`));
+  const normalized = await deps.mergeAudio(inputs, storage.local.absolutePath(original), uploaded);
+  if (uploaded) {
+    if (!normalized) throw new Error('The uploaded audio could not be prepared.');
+    for (const [index, file] of files.entries()) {
+      file.durationMs = normalized.fileDurationsMs[index] ?? 0;
+      await deps.db
+        .update(audioFiles)
+        .set({ durationMs: file.durationMs })
+        .where(eq(audioFiles.id, file.id));
+    }
+  }
   return {
     path: storage.local.absolutePath(original),
-    durationMs: files.reduce((total, file) => total + file.durationMs, 0),
+    durationMs: normalized
+      ? normalized.durationMs
+      : files.reduce((total, file) => total + file.durationMs, 0),
   };
 }
 

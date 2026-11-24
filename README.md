@@ -44,6 +44,7 @@
 | Sorts your minutes   | A Minutes tab sorts transcripts by date, company or person, or in your own folders.                           |
 | Shares minutes       | Email the minutes to attendees through Emailit, SMTP or Gmail. Never without a click.                         |
 | Records in person    | A phone recorder (installable web app) for conversations that are not on a call.                              |
+| Uploads audio        | Combine ordered MP3, WAV, M4A, OGG or WebM files into one meeting: 10 MB per file, 100 MB total.              |
 | Imports Fireflies    | Upload your Fireflies data export to bring in the recordings, which are then transcribed and summarised here. |
 | Stays yours          | One Postgres, one volume. Secrets encrypted at rest. No telemetry, no account, no cloud.                      |
 
@@ -69,6 +70,8 @@ Then:
 5. Open the meeting, name the speakers if needed, then Share the minutes or download them.
 
 `OPENMINUTES_SECRET` is the only value you must set yourself: it encrypts stored secrets, so back up `.env`. Other options are in [.env.example](.env.example). Add `--profile local` to run the bundled faster-whisper transcriber.
+
+For an existing recording, open **Meetings → Upload audio**, enter a title, select files, and arrange their order before choosing **Upload and transcribe**. One submission creates one meeting. Uploads use your configured transcription provider. Retry interrupted uploads while the page remains open; discard an unfinished upload from its meeting page to start again. Each file can contain up to 10,000,000 bytes; all files together can contain up to 100,000,000 bytes.
 
 Guides: [getting started](docs/getting-started.md), [HTTPS](docs/reverse-proxy.md), [Google](docs/google-oauth.md), [Azure](docs/azure-app.md), [providers and cost](docs/providers.md). Updating: [UPGRADING.md](UPGRADING.md).
 

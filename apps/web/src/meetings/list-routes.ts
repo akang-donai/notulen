@@ -77,7 +77,7 @@ export function listRoutes(db: Database): Hono {
         meeting: meetings,
         durationMs: sql<
           number | null
-        >`(select max(duration_ms) from audio_files where audio_files.meeting_id = meetings.id)`,
+        >`(select case when meetings.join_url like 'upload://%' then sum(duration_ms)::int else max(duration_ms) end from audio_files where audio_files.meeting_id = meetings.id)`,
         participantCount: sql<number>`(select count(*)::int from participants where participants.meeting_id = meetings.id and not participants.is_bot)`,
         skippedSeriesId: sql<
           string | null

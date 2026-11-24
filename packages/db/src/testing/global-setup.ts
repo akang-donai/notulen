@@ -22,6 +22,7 @@ export default async function setup() {
   const databaseDir = await mkdtemp(join(tmpdir(), 'openminutes-pg-'));
   const port = await freePort();
   const server = new EmbeddedPostgres({
+    createPostgresUser: process.getuid?.() === 0,
     databaseDir,
     port,
     user: 'postgres',

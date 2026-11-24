@@ -1,0 +1,27 @@
+.audio-upload {
+  padding: 24px;
+  max-width: 760px;
+}
+.audio-upload label {
+  display: grid;
+  gap: 8px;
+}
+.audio-upload input {
+  width: 100%;
+}
+.audio-upload p {
+  margin: 0;
+}
+.audio-upload-files {
+  margin: 0;
+  padding-left: 24px;
+}
+.audio-upload-files li {
+  padding: 12px 0;
+  border-bottom: 1px solid var(--line);
+}
+.audio-upload-name {
+  display: block;
+  overflow-wrap: anywhere;
+  margin-bottom: 8px;
+}

@@ -12,6 +12,15 @@ Generated from the route table by `apps/web/src/api-reference.test.ts`. Run `UPD
 | `PUT` | `/api/accounts/calendars/:id` | Browser session only |
 | `PUT` | `/api/accounts/providers/:provider` | Browser session only |
 
+## audio-uploads
+
+| Method | Path | Access |
+| ------ | ---- | ------ |
+| `POST` | `/api/audio-uploads` | Full key |
+| `DELETE` | `/api/audio-uploads/:id` | Full key |
+| `PUT` | `/api/audio-uploads/:id/files/:index` | Full key |
+| `POST` | `/api/audio-uploads/:id/finish` | Full key |
+
 ## exporters
 
 | Method | Path | Access |

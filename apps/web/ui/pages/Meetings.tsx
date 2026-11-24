@@ -329,6 +329,9 @@ export function Meetings() {
           <p className="lede">Send the bot into a meeting now, or let your calendar do it.</p>
         </div>
         <div className="head-actions">
+          <a className="button" href="#/upload">
+            Upload audio
+          </a>
           <a className="button" href="#/import">
             <ImportIcon />
             <span>Import</span>

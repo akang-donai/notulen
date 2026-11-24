@@ -1,4 +1,5 @@
 import type { CustomTemplate } from '@openminutes/minutes';
+import type { AudioUploadInput, AudioUploadDto } from '../src/dto/audio-uploads.js';
 import type { DeliveryDto, WebhookDto, WebhookEventName, WebhookInput } from '../src/dto.js';
 import type {
   AccountsDto,
@@ -504,6 +505,14 @@ export const api = {
   saveSpeakerSettings: (body: SpeakerSettingsDto) =>
     request<SpeakerSettingsDto>('/settings/speakers', { method: 'PUT', body }),
   importConfig: () => request<ImportConfigDto>('/imports/config'),
+  audioUploadStart: (body: AudioUploadInput) =>
+    request<AudioUploadDto>('/audio-uploads', { method: 'POST', body }),
+  audioUploadFile: (id: string, index: number, file: Blob) =>
+    request<{ ok: true }>(`/audio-uploads/${id}/files/${index}`, { method: 'PUT', file }),
+  audioUploadFinish: (id: string) =>
+    request<AudioUploadDto>(`/audio-uploads/${id}/finish`, { method: 'POST', body: {} }),
+  audioUploadDiscard: (id: string) =>
+    request<{ ok: true }>(`/audio-uploads/${id}`, { method: 'DELETE', body: {} }),
   importChunk: (id: string, index: number, file: Blob) =>
     request<{ ok: true }>(`/imports/${id}/chunks/${String(index)}`, { method: 'PUT', file }),
   importFinish: (id: string, chunks: number) =>

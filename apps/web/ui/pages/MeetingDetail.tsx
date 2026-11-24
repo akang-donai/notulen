@@ -1,4 +1,5 @@
 import { useCallback, useRef, useState } from 'react';
+import { AUDIO_UPLOAD_PENDING_MESSAGE } from '../../src/dto/audio-uploads.js';
 import { api, errorMessage, meetingUrl, type ReprocessOptions } from '../api.js';
 import { CheckPeople } from '../CheckPeople.js';
 import { CalendarLinkPanel } from '../CalendarLinkPanel.js';
@@ -376,6 +377,35 @@ export function MeetingDetail({ id }: { id: string }) {
                 : 'No audio yet.'}
             </p>
           )}
+          {meeting.status === 'ended' &&
+            meeting.joinUrl.startsWith('upload://') &&
+            meeting.error === AUDIO_UPLOAD_PENDING_MESSAGE && (
+              <p className="empty">
+                <button
+                  type="button"
+                  onClick={() => {
+                    change(() => api.audioUploadFinish(id));
+                  }}
+                >
+                  Retry processing
+                </button>
+              </p>
+            )}
+          {meeting.status === 'uploading' && meeting.joinUrl.startsWith('upload://') && (
+            <p className="empty">
+              Upload incomplete.{' '}
+              <button
+                type="button"
+                onClick={() => {
+                  void api.audioUploadDiscard(id).then(() => {
+                    window.location.hash = '#/';
+                  }, report);
+                }}
+              >
+                Discard upload
+              </button>
+            </p>
+          )}
           <TranscriptPlayer
             meetingId={id}
             recording={audio && { src: meetingUrl(id, 'audio'), durationMs: audio.durationMs }}
@@ -429,9 +459,13 @@ export function MeetingDetail({ id }: { id: string }) {
                 <>
                   <dt>Source</dt>
                   <dd>
-                    <a href={meeting.joinUrl} target="_blank" rel="noreferrer">
-                      Fireflies <ExternalIcon />
-                    </a>
+                    {meeting.joinUrl.startsWith('upload://') ? (
+                      'Audio upload'
+                    ) : (
+                      <a href={meeting.joinUrl} target="_blank" rel="noreferrer">
+                        Fireflies <ExternalIcon />
+                      </a>
+                    )}
                   </dd>
                 </>
               )}

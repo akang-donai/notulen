@@ -228,6 +228,7 @@ export function meetingRoutes(deps: MeetingDeps): Hono {
 
   async function canTranscribe(meeting: typeof meetings.$inferSelect): Promise<boolean> {
     if (!RERUNNABLE.includes(meeting.status)) return false;
+    if (meeting.joinUrl.startsWith('upload://') && meeting.status === 'ended') return false;
     const [recorded] = await deps.db
       .select({ id: audioFiles.id })
       .from(audioFiles)

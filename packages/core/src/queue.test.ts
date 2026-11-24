@@ -33,4 +33,16 @@ describe('JobQueue', () => {
     );
     expect(rows[0]).toMatchObject({ expire_seconds: 6 * 3600, retry_limit: 1 });
   });
+
+  it('deduplicates concurrent upload finalizations with the same job ID', async () => {
+    const id = '843e9890-7848-4f75-9198-aa6ff528f4d4';
+    await Promise.all(
+      Array.from({ length: 3 }, () => queue.send('meeting.process', { meetingId: id }, { id })),
+    );
+    const { rows } = await test.pool.query<{ count: number }>(
+      "select count(*)::int as count from pgboss.job where name = 'meeting.process' and id = $1",
+      [id],
+    );
+    expect(rows[0]?.count).toBe(1);
+  });
 });
